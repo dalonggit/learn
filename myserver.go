@@ -38,6 +38,10 @@ func Handler(client *Client) {
 }
 
 func MessageFunc(id int, msg []byte) {
+	if string(msg[0]) == "g" {
+		ALLNotify([]byte("from 公共频道 ：" +  string(msg[1:])), id)
+		return
+	}
 	re, _ := regexp.Compile("^\\d+")
 	ret := re.Find(msg)
 	fmt.Println("ret  " + string(ret))
@@ -101,8 +105,16 @@ func main() {
 	}
 }
 
-func ALLNotify(msg []byte) {
+func ALLNotify(msg []byte, ex ... int) {
 	for _, v := range all_user {
-		v.send <- msg
+		send := true
+		for _, id := range ex {
+			if v.id == id{
+				send = false
+			}
+		}
+		if send{
+			v.send <- msg
+		}
 	}
 }
